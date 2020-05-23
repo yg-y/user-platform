@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>学生管理</title>
+    <link rel="stylesheet" href="./js/elmentui-index.css">
+</head>
+<div id="app" :style="'height:'+ height +'px'">
+    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
+        <el-menu-item index="1">学生管理</el-menu-item>
+        <el-menu-item index="2">频词统计</el-menu-item>
+    </el-menu>
+
+    <iframe id="iframe" :src="url" scrolling="auto" width="100%" height="100%" style="overflow-y : hidden;"
+            frameborder="0"></iframe>
+
+</div>
+
+<script src="./js/vue@2.6.11.js"></script>
+<script src="./js/element-index.js"></script>
+<script src="./js/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            activeIndex: '1',
+            activeIndex2: '1',
+            url: 'user/index.html',
+            height: document.body.clientWidth
+        },
+        created() {
+        },
+        methods: {
+            handleSelect(key, keyPath) {
+                if (key === '1') {
+                    vm.url = 'user/index.html'
+                }
+                if (key === '2') {
+                    vm.url = 'user/upload.html'
+                }
+            }
+        }
+    })
+</script>
+</html>

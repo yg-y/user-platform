@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>上传分析</title>
+    <link rel="stylesheet" href="../js/elmentui-index.css">
+</head>
+<div id="app">
+    <el-upload
+            class="upload-demo"
+            drag
+            :action="url"
+            :on-success="uploadSuccess"
+            accept=".txt"
+            multiple>
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        <div class="el-upload__tip" slot="tip">只能上传txt文件</div>
+    </el-upload>
+
+    <h2>解析文件单词：</h2>
+    <div style="display: flex;flex-wrap: wrap;margin-top: 1%">
+        <div v-for="item in uploadList" style="margin-left: 10px;margin-top: 10px">
+            <el-tag type="info">
+                {{ item }}
+            </el-tag>
+        </div>
+    </div>
+
+    <h2>频词统计</h2>
+    <el-button @click="analysis">点击开始分析</el-button>
+    <div style="display: flex;flex-wrap: wrap;margin-top: 1%">
+        <el-table
+                :data="analysisList"
+                style="width: 100%">
+            <el-table-column
+                    prop="key"
+                    label="单词"
+                    width="180">
+            </el-table-column>
+            <el-table-column
+                    prop="value"
+                    label="次数"
+                    width="180">
+            </el-table-column>
+        </el-table>
+    </div>
+
+</div>
+
+<script src="../js/vue@2.6.11.js"></script>
+<script src="../js/element-index.js"></script>
+<script src="../js/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            activeIndex: '1',
+            activeIndex2: '1',
+            url: 'http://' + window.location.host + "/upload/file",
+            uploadList: [],
+            analysisList: []
+        },
+        created() {
+        },
+        methods: {
+            handleSelect(key, keyPath) {
+                console.log(key, keyPath);
+            },
+            uploadSuccess(response, file, fileList) {
+                console.log(response)
+                if (response.code === 200) {
+                    this.uploadList = response.data
+                } else {
+                    vm.$message({
+                        message: response.msg,
+                        type: 'warning'
+                    })
+                }
+            },
+            analysis() {
+                if (this.uploadList === undefined || this.uploadList === null || this.uploadList.length === 0) {
+                    vm.$message({
+                        message: '没有找到需要分析的数据',
+                        type: 'warning'
+                    })
+                    return
+                }
+                axios.get('/frequent/result')
+                    .then(function (response) {
+                        vm.analysisList = response.data.data
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+            }
+        }
+    })
+</script>
+</html>

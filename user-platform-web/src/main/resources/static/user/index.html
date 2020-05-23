@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>学生管理</title>
+    <link rel="stylesheet" href="../js/elmentui-index.css">
+</head>
+<div id="app">
+    <div id="search">
+        <el-row :gutter="24">
+            <el-col :span="5">
+                <el-input
+                        placeholder="请输入关键词搜索"
+                        v-model="search.keyword"
+                        clearable>
+                </el-input>
+            </el-col>
+            <el-col :span="5">
+                <el-button type="success" icon="el-icon-search" @click="handelSearch" circle></el-button>
+            </el-col>
+            <el-col :span="14">
+                <el-button style="float: right" type="primary" @click="addInfo">新增</el-button>
+            </el-col>
+        </el-row>
+    </div>
+    <div id="table" style="margin-top: 1%">
+        <el-table
+                :data="tableData"
+                border
+                style="width: 100%">
+            <el-table-column
+                    fixed
+                    prop="createTime"
+                    label="日期"
+                    width="150">
+                <template slot-scope="scope">
+                    <span style="margin-left: 10px">{{ jsDate(scope.row.createTime) }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="idCard"
+                    label="学号"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    prop="name"
+                    label="姓名"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    prop="username"
+                    label="账号"
+                    width="150">
+            </el-table-column>
+            <el-table-column
+                    prop="classz"
+                    label="班级"
+                    min-width="120">
+            </el-table-column>
+            <el-table-column
+                    prop="college"
+                    label="学院"
+                    min-width="120">
+            </el-table-column>
+            <el-table-column
+                    prop="address"
+                    label="地址"
+                    min-width="120">
+            </el-table-column>
+            <el-table-column
+                    fixed="right"
+                    label="操作"
+                    width="100">
+                <template slot-scope="scope">
+                    <el-button type="text" size="small" @click="editInfo(scope.row)">编辑</el-button>
+                    <el-button type="text" size="small" @click="deleteInfo(scope.row)">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page.sync="pagination.page"
+                :page-sizes="[10, 20, 50, 100]"
+                :page-size="pagination.size"
+                layout="sizes, prev, pager, next"
+                :total="pagination.total">
+        </el-pagination>
+    </div>
+
+
+    <el-dialog top="5vh" :title="dialogTitle" :visible.sync="dialogFormVisible">
+        <el-form :model="form">
+            <el-form-item label="学号" label-width="100">
+                <el-input v-model="form.idCard" autocomplete="off" placeholder="请输入学号"></el-input>
+            </el-form-item>
+            <el-form-item label="姓名" label-width="100">
+                <el-input v-model="form.name" autocomplete="off" placeholder="请输入姓名"></el-input>
+            </el-form-item>
+            <el-form-item label="账号" label-width="100">
+                <el-input v-model="form.username" autocomplete="off" placeholder="请输入账号"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" label-width="100">
+                <el-input v-model="form.password" type="password" autocomplete="off" placeholder="请输入密码"></el-input>
+            </el-form-item>
+            <el-form-item label="班级" label-width="100">
+                <el-input v-model="form.classz" autocomplete="off" placeholder="请输入班级"></el-input>
+            </el-form-item>
+            <el-form-item label="学院" label-width="100">
+                <el-input v-model="form.college" autocomplete="off" placeholder="请输入学院"></el-input>
+            </el-form-item>
+            <el-form-item label="地址" label-width="100">
+                <el-input v-model="form.address" type="textarea" autocomplete="off" placeholder="请输入地址"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="clickSubmit">确 定</el-button>
+        </div>
+    </el-dialog>
+</div>
+
+<script src="../js/vue@2.6.11.js"></script>
+<script src="../js/element-index.js"></script>
+<script src="../js/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            tableData: [],
+            pagination: {
+                page: 1,
+                size: 10,
+                total: 0
+            },
+            dialogTitle: '新增用户',
+            dialogFormVisible: false,
+            visible: false,
+            form: {},
+            search: {}
+        },
+        created() {
+            this.initPage()
+        },
+        methods: {
+            handleSizeChange(val) {
+                this.initPage()
+            },
+            handleCurrentChange(val) {
+                this.initPage()
+            },
+            initPage() {
+                let url = '/user/tb-user/page?page=' + this.pagination.page + '&size=' + this.pagination.size
+                if (this.search.keyword !== undefined && this.search.keyword !== null) {
+                    url = '/user/tb-user/page?page='
+                        + this.pagination.page + '&size='
+                        + this.pagination.size + '&keyword='
+                        + this.search.keyword
+                }
+                axios.get(url)
+                    .then(function (response) {
+                        console.log(response.data.data.records);
+                        vm.tableData = response.data.data.records
+                        vm.pagination.total = response.data.data.total
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+            },
+            jsDate(date) {
+                let format = new Date(date);
+                let number = Number(format.getUTCMonth()) + 1
+                return format.getFullYear() + "-" + number + "-" + format.getDate()
+            },
+            editInfo(data) {
+                this.form = JSON.parse(JSON.stringify(data))
+                this.dialogTitle = '编辑用户'
+                this.dialogFormVisible = !this.dialogFormVisible
+            },
+            addInfo() {
+                this.form = {}
+                this.dialogTitle = '新增用户'
+                this.dialogFormVisible = !this.dialogFormVisible
+            },
+            deleteInfo(data) {
+                axios.delete('/user/tb-user/delete/user/' + data.id)
+                    .then(function (response) {
+                        vm.initPage()
+                        if (response.data.code === 200) {
+                            vm.$message({
+                                message: '操作成功',
+                                type: 'success'
+                            })
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+            },
+            handelSearch() {
+                this.initPage()
+            },
+            clickSubmit() {
+                let url = '/user/tb-user/addOrUpdate'
+                console.log(url)
+                axios.post(url, this.form)
+                    .then(function (response) {
+                        if (response.data.code === 200) {
+                            vm.$message({
+                                message: '操作成功',
+                                type: 'success'
+                            });
+                            vm.dialogFormVisible = false
+                        } else {
+                            vm.$message({
+                                message: response.data.msg,
+                                type: 'warning'
+                            });
+                        }
+                        vm.initPage()
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+            }
+        }
+    })
+</script>
+</html>
