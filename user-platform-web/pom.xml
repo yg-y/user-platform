@@ -21,7 +21,7 @@
         <mysql-connector-java>8.0.13</mysql-connector-java>
         <hutool-all>4.5.16</hutool-all>
         <springfox-swagger>2.9.2</springfox-swagger>
-        <alibaba-fastjson>1.2.60</alibaba-fastjson>
+        <alibaba-fastjson>1.2.83</alibaba-fastjson>
         <jedis>3.2.0</jedis>
         <gson>2.8.6</gson>
     </properties>
